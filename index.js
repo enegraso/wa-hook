@@ -44,21 +44,47 @@ app.get('/webhooks', (req, res) => {
 
 app.post('/webhooks', (req, res) => {
     const body_param = req.body;
-    if (body_param) {
-        
-        console.log(body_param.entry[0].changes[0].value.messages[0].from);
-        console.log("=====");
-        if (body_param.entry[0].changes[0].value.message[0].type === "text")
-        { console.log(body_param.entry[0].changes[0].value.messages[0].text.body);
-        console.log("====="); }
-        console.log(body_param.entry[0].changes[0].value.message[0].id);
-        console.log("====");
-        console.log(body_param.entry[0].changes[0].value.message[0].timestamp);
-        console.log("====");
-        console.log(body_param.entry[0].changes[0].value.message[0].type);
-        console.log("====");
+    try {
+        if (body_param) {
+            switch (body_param.entry[0].changes[0].value.messages[0].type) {
+                case 'text':
+                    console.log('Mensaje de texto');
+                    console.log("cuerpo del mensaje",body_param.entry[0].changes[0].value.messages[0])
+                    break;
+                case 'image':
+                    console.log('Mensaje de imagen');
+                    console.log("cuerpo del mensaje",body_param.entry[0].changes[0].value.messages[0])
+                    break;
+                case 'contacts':
+                    console.log('Mensaje de contacto');
+                    console.log("cuerpo del mensaje",body_param.entry[0].changes[0].value.messages[0])
+                    break;
+                default:
+                    console.log(`Mensaje tipo:`, body_param.entry[0].changes[0].value.messages[0].type);
+                    console.log("cuerpo del mensaje",body_param.entry[0].changes[0].value.messages[0])
+            }
+
+/*             console.log("Envia",body_param.entry[0].changes[0].value.messages[0].from);
+            console.log("=====");
+            if (body_param.entry[0].changes[0].value.messages[0].type === "text") {
+                console.log("Escribió",body_param.entry[0].changes[0].value.messages[0].text.body);
+                console.log("=====");
+            } else {
+                console.log("cuerpo del mensaje",body_param.entry[0].changes[0].value.messages[0]);
+                console.log("=====");
+            } 
+            console.log(body_param.entry[0].changes[0].value.messages[0].id);
+            console.log("====");
+            console.log(body_param.entry[0].changes[0].value.messages[0].timestamp);
+            console.log("====");
+            console.log(body_param.entry[0].changes[0].value.messages[0].type);
+            console.log("====");
+ */        }
+        res.status(200).json(body_param)
+
+    } catch (error) {
+        res.status(400).send({ "mensaje": error })
     }
-    res.send(body_param)
 });
 
 app.get('/webhooks/sendmess', (req, res) => {
@@ -80,8 +106,8 @@ app.get('/webhooks/sendmess', (req, res) => {
         // console.log(req)
         //      console.log("==============================================", datos, "=================================")
         res.sendStatus(200)
-    } catch {
-        res.sendStatus(404)
+    } catch (error) {
+        res.status(400).send({ "mensaje": error })
     }
 });
 
@@ -191,13 +217,13 @@ app.post(('/webhooks/addcliente'), async (req, res) => {
             private_key: process.env.GOOGLE_PRIVATE_KEY,
         });
 
-        const obj = {"strings":[{n:"prueba",name:"federico",email:"federico@federico"}]};
-// obj.name = obj;
-const result = JSON.stringify(obj, getCircularReplacer());
-console.log(result); // 👉️ {"address":{"country":"Chile"},"numbers":[1,2,3],"age":30}
-console.log(obj)
+        const obj = { "strings": [{ n: "prueba", name: "federico", email: "federico@federico" }] };
+        // obj.name = obj;
+        const result = JSON.stringify(obj, getCircularReplacer());
+        console.log(result); // 👉️ {"address":{"country":"Chile"},"numbers":[1,2,3],"age":30}
+        console.log(obj)
 
-         await doc.loadInfo(); // loads document properties and worksheets
+        await doc.loadInfo(); // loads document properties and worksheets
         const sheet = doc.sheetsById[258060524]  //[SHEET_ID] // ({ headerValues: ['V', 'AV'] })
         // append rows 
         const larryRow = await sheet.addRow(obj);
@@ -212,12 +238,12 @@ console.log(obj)
 const getCircularReplacer = () => {
     const seen = new WeakSet();
     return (key, value) => {
-      if (typeof value === 'object' && value !== null) {
-        if (seen.has(value)) {
-          return;
+        if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+                return;
+            }
+            seen.add(value);
         }
-        seen.add(value);
-      }
-      return value;
+        return value;
     };
-  };
+};
